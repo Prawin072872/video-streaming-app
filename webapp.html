@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Library</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      letter-spacing: 1px;
+      text-shadow: 0 3px 8px rgba(0,0,0,0.5);
+    }
+
+    .video-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .card {
+      background: #2f2f48;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .card h2 {
+      font-size: 1.3em;
+      margin-bottom: 10px;
+      color: #ffcc70;
+      text-align: center;
+    }
+
+    .card video {
+      width: 100%;
+      border-radius: 10px;
+      margin: 10px 0;
+      outline: none;
+      background: #000;
+      cursor: pointer;
+    }
+
+    .card p {
+      font-size: 0.95em;
+      color: #ddd;
+      text-align: center;
+      margin-top: 5px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8em;
+      }
+      .card {
+        padding: 15px;
+      }
+      .card h2 {
+        font-size: 1.1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎬 Video Library</h1>
+  <div class="video-container" id="videoContainer"></div>
+
+  <script>
+    async function fetchVideos() {
+      try {
+        const response = await fetch('http://localhost:8080/movie-info/list');
+        const videos = await response.json();
+        const container = document.getElementById('videoContainer');
+
+        videos.forEach(video => {
+          const card = document.createElement('div');
+          card.className = 'card';
+
+          const title = document.createElement('h2');
+          title.textContent = video.name;
+
+          const videoEl = document.createElement('video');
+          videoEl.src = `http://localhost:8080/stream-with-id/${video.id}`;
+          videoEl.controls = true;
+          videoEl.preload = 'metadata';
+          videoEl.addEventListener('loadedmetadata', () => {
+            // Seek to 2 seconds to create a thumbnail
+            videoEl.currentTime = 2;
+            videoEl.pause();
+          });
+
+          const desc = document.createElement('p');
+          desc.textContent = video.description;
+
+          card.appendChild(title);
+          card.appendChild(videoEl);
+          card.appendChild(desc);
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Error loading videos:", error);
+      }
+    }
+
+    fetchVideos();
+  </script>
+</body>
+</html>
